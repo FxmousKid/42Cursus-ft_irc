@@ -1,6 +1,13 @@
 # Prerequisites
 *.d
 
+ircserv
+
+# dev environnement
+.cache
+compile_commands.json
+build/
+
 # Compiled Object files
 *.slo
 *.lo
