@@ -1,0 +1,4 @@
+build/
+ircserv
+.cache
+compile_commands.json
