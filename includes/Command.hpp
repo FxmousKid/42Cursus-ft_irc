@@ -2,6 +2,7 @@
 
 #include <string>
 #include <numeric>
+#include <vector>
 
 typedef std::string str;
 typedef std::vector<str> vec_str;

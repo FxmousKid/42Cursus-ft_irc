@@ -1,4 +1,5 @@
 
+#include "Server.hpp"
 #include "ft_irc.hpp"
 
 int main(int argc, char **argv)
@@ -13,8 +14,18 @@ int main(int argc, char **argv)
 		std::cout << "Port must be a number" << std::endl;
 		return (1);
 	}
-
 	Server server = Server(atoi(argv[1]), argv[2]);
-	server.listen();
+
+	try { server.listen(); }
+	catch (std::exception &e)
+	{
+		std::cerr << "Error: " << e.what() << std::endl;
+		return (1);
+	}
+	catch (...)
+	{
+		std::cerr << "Unknown error occurred." << std::endl;
+		return (1);
+	}
 	return (0);
 }

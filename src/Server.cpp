@@ -1,7 +1,11 @@
+#include "Server.hpp"
 #include "ft_irc.hpp"
 #include <cerrno>
+#include <cstdio>
 #include <netinet/in.h>
 #include <sys/socket.h>
+
+bool Server::_signal_recv = false;
 
 Server::Server(int port, str const &password) :
 	_port(port),
@@ -25,6 +29,9 @@ Server::~Server(void)
 void	Server::listen(void)
 {
 	struct sockaddr_in server_addr;
+
+	// signal handler
+	this->setSignalHandler();
 
 	this->_server_socket = socket(AF_INET, SOCK_STREAM , 0);
 	if(this->_server_socket == 0)
@@ -67,16 +74,23 @@ void	Server::listen(void)
 
 	std::cout << "Waiting for connections ..." << std::endl;
 	this->_constructFds();
-	while (42)
+	while (!Server::_signal_recv)
 		this->_waitActivity();
 }
+
+#include <cerrno>
+#include <cstring>
+
 
 void	Server::_waitActivity(void)
 {
 	// wait for an activity in a socket
-	int rc = poll(this->_clients_fds, this->_clients.size() + 1, -1);
-	if (rc < 0)
-		std::cout << "Error: Can't look for socket(s) activity." << std::endl;
+	if (poll(this->_clients_fds, this->_clients.size() + 1, -1) < 0 && !Server::_signal_recv)
+	{
+		std::cout << std::strerror(errno) <<"\nError: Can't look for socket(s) activity." << std::endl;
+		std::fflush(stdout);
+		throw std::runtime_error("poll() failed");
+	}
 
 	// loop in every client socket for a connection
 	for(unsigned long i=0; i < this->_clients.size() + 1; i++)
@@ -135,7 +149,7 @@ void	Server::_receiveData(Client *client)
 {
 	char	buffer[BUFFER_SIZE + 1];
 
-	do {
+	while(!Server::_signal_recv) {
 		int ret = recv(client->getFD(), buffer, sizeof(buffer), 0);
 		if (ret < 0)
 		{
@@ -174,7 +188,7 @@ void	Server::_receiveData(Client *client)
 					std::cout << "partial recv(" << client->getFD() << "): " << buff << std::endl;
 			}
 		}
-	} while(TRUE);
+	}
 }
 
 void	Server::_setNonBlocking(int fd)
@@ -299,6 +313,19 @@ void	Server::_constructFds(void)
 		this->_clients_fds[i + 1].fd = this->_clients[i]->getFD();
 		this->_clients_fds[i + 1].events = POLLIN;
 	}
+}
+
+void	Server::_signalHandler(int signum)
+{
+	std::cout << "Signal " << signum << " caught !" << std::endl; 
+	Server::_signal_recv = true;
+}
+
+void	Server::setSignalHandler(void)
+{
+	signal(SIGINT, _signalHandler);
+	signal(SIGQUIT, _signalHandler);
+	signal(SIGTERM, _signalHandler);
 }
 
 Channel *Server::getChannel(const str &name)

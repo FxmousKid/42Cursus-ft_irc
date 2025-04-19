@@ -31,6 +31,7 @@ class Channel;
 
 class Server {
 private:
+	static bool				_signal_recv;
 	const int				_port;
 	str			 			_password;
 	std::vector<Client *>	_clients;
@@ -49,6 +50,7 @@ private:
 	void					_acceptConnection(void);
 	void 					_receiveData(Client *client);
 	void					_handleMessage(const str& message, Client *client);
+	static void				_signalHandler(int signum);
 
 public:
 	Server(int port, str const &password);
@@ -67,6 +69,10 @@ public:
 	str&			getPassword(void);
 	str&			getServerName(void) ;
 	str&			getStartTime(void);
+	
+	// signals
+	void			setSignalHandler(void);
+
 
 	// Client
 	vec_str						getNickNames(void);

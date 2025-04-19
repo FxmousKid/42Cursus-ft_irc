@@ -11,6 +11,7 @@
 # define TRUE 1
 # define FALSE 0
 
+#include <signal.h>
 #include "ANSI-colors.hpp"
 # include "Client.hpp"
 # include "Channel.hpp"
