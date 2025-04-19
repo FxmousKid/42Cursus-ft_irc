@@ -4,17 +4,17 @@ PrivMsgCommand::PrivMsgCommand(Server *server) : Command(server) {};
 
 PrivMsgCommand::~PrivMsgCommand() {};
 
-void PrivMsgCommand::execute(Client *client, std::vector<std::string> arguments) {
+void PrivMsgCommand::execute(Client *client, vec_str arguments) {
 
 	if (arguments.size() < 2 || arguments[0].empty() || arguments[1].empty()) {
 		client->reply(ERR_NEEDMOREPARAMS(client->getNickName(), "PRIVMSG"));
 		return;
 	}
 
-	std::string target = arguments.at(0);
-	std::string message;
+	str target = arguments.at(0);
+	str message;
 
-	for (std::vector<std::string>::iterator it = arguments.begin() + 1; it != arguments.end(); it++) {
+	for (vec_str::iterator it = arguments.begin() + 1; it != arguments.end(); it++) {
 		message.append(*it + " ");
 	}
 
@@ -26,7 +26,7 @@ void PrivMsgCommand::execute(Client *client, std::vector<std::string> arguments)
 		std::vector<Channel *>:: iterator it = client_chans.begin();
 
 		Channel *chan;
-		std::string chan_name;
+		str chan_name;
 		while (it != client_chans.end())
 		{
 			chan = it.operator*();
