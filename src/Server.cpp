@@ -82,6 +82,7 @@ void	Server::listen(void)
 #include <cstring>
 
 
+/*
 void	Server::_waitActivity(void)
 {
 	// wait for an activity in a socket
@@ -108,6 +109,137 @@ void	Server::_waitActivity(void)
 			this->_receiveData(client);
 		}
 	}
+}
+*/
+
+void Server::_waitActivity(void)
+{
+    // wait for an activity in a socket
+    if (poll(this->_clients_fds, this->_clients.size() + 1, -1) < 0 && !Server::_signal_recv)
+    {
+        std::cout << std::strerror(errno) <<"\nError: Can't look for socket(s) activity." << std::endl;
+        std::fflush(stdout);
+        throw std::runtime_error("poll() failed");
+    }
+
+    // Check server socket first
+    if (this->_clients_fds[0].revents != 0)
+        this->_acceptConnection();
+    
+    // Now process client sockets - store indexes to process in a separate vector
+    // This prevents issues with deleting clients during processing
+    std::vector<unsigned long> active_clients;
+    for (unsigned long i = 1; i < this->_clients.size() + 1; i++)
+    {
+        if (this->_clients_fds[i].revents != 0)
+            active_clients.push_back(i - 1);  // Store the client index to process
+    }
+    
+    // Now process active clients
+    for (std::vector<unsigned long>::iterator it = active_clients.begin(); 
+         it != active_clients.end(); ++it)
+    {
+        // Check if this client index is still valid
+        if (*it < this->_clients.size())
+        {
+            Client *client = this->_clients[*it];
+            int client_fd = client->getFD();
+            
+            // Process the client data safely
+            this->_processClientData(client);
+            
+            // Check if this client was deleted during processing
+            bool client_exists = false;
+            for (unsigned long i = 0; i < this->_clients.size(); i++)
+            {
+                if (this->_clients[i]->getFD() == client_fd)
+                {
+                    client_exists = true;
+                    break;
+                }
+            }
+            
+            if (!client_exists)
+            {
+                // Client was deleted, skip any further processing
+                continue;
+            }
+        }
+    }
+}
+
+// New method to safely process client data
+void Server::_processClientData(Client *client)
+{
+    char buffer[BUFFER_SIZE + 1];
+    int client_fd = client->getFD();  // Store the fd for later checks
+    
+    while (!Server::_signal_recv) {
+        int ret = recv(client_fd, buffer, sizeof(buffer), 0);
+        if (ret < 0)
+        {
+            if (errno != EWOULDBLOCK)
+            {
+                std::cout << "Error: recv() failed for fd " << client_fd;
+                this->delClient(client_fd);
+            }
+            // no more data to receive
+            break;
+        }
+        else if (!ret)
+        {
+            if (DEBUG)
+                std::cout << RED << "Error: Connection closed by client " << client_fd << WHT << std::endl;
+            this->delClient(client_fd);
+            break;
+        }
+        else
+        {
+            buffer[ret] = '\0';
+            str buff = buffer;
+            
+            std::cout << YEL <<"recv(" << client_fd << "): " << WHT << buff;
+            
+            // Process complete lines
+            if (buff.at(buff.size() - 1) == '\n') {
+                vec_str cmds = ft_split(client->getPartialRecv() + buff, '\n');
+                client->setPartialRecv("");
+                
+                // Process each command
+                for (vec_str::iterator it = cmds.begin(); it != cmds.end(); it++)
+                {
+                    // Store commands to process
+                    str cmd = *it;
+                    
+                    // Process the command
+                    this->_handler.invoke(client, cmd);
+                    
+                    // Check if client still exists
+                    bool client_exists = false;
+                    for (unsigned long i = 0; i < this->_clients.size(); i++)
+                    {
+                        if (this->_clients[i]->getFD() == client_fd)
+                        {
+                            client_exists = true;
+                            break;
+                        }
+                    }
+                    
+                    if (!client_exists)
+                    {
+                        // Client was deleted, exit the function
+                        return;
+                    }
+                }
+            }
+            else
+            {
+                client->setPartialRecv(client->getPartialRecv() + buff);
+                if (DEBUG)
+                    std::cout << "partial recv(" << client_fd << "): " << buff << std::endl;
+            }
+        }
+    }
 }
 
 void	Server::_acceptConnection(void)

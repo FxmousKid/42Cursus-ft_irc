@@ -50,6 +50,7 @@ private:
 	void					_acceptConnection(void);
 	void 					_receiveData(Client *client);
 	void					_handleMessage(const str& message, Client *client);
+	void					_processClientData(Client *client);	
 	static void				_signalHandler(int signum);
 
 public:
