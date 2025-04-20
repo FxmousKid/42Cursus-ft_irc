@@ -13,6 +13,7 @@ Client::Client(Server *server, int fd, std::string const &hostname, int port):
 
 Client::~Client() 
 {
+	std::cout << RED << "Destroying client " << _fd << WHT << std::endl;
 }
 
 void	Client::write(const std::string &message) const

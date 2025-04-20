@@ -46,7 +46,7 @@ CFLAGS = -Wall -Werror -Wextra -std=c++98 -I$(INC_DIR) -MMD -MP
 CFLAGS += -g3 -D DEBUG=$(DEBUG) -D BUFFER_SIZE=$(BUFFER_SIZE)
 LFLAGS =
 
-DEBUG = 0
+DEBUG = 1
 BUFFER_SIZE	= 4096
 
 MKDIR = mkdir -p

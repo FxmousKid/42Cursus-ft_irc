@@ -148,8 +148,9 @@ void	Server::_acceptConnection(void)
 void	Server::_receiveData(Client *client)
 {
 	char	buffer[BUFFER_SIZE + 1];
+	bool	client_del = false;
 
-	while(!Server::_signal_recv) {
+	while(!Server::_signal_recv && !client_del) {
 		int ret = recv(client->getFD(), buffer, sizeof(buffer), 0);
 		if (ret < 0)
 		{
@@ -157,6 +158,7 @@ void	Server::_receiveData(Client *client)
 			{
 				std::cout << "Error: recv() failed for fd " << client->getFD();
 				this->delClient(client->getFD());
+				client_del = true;
 			}
 			// no more data to receive
 			break;
@@ -172,6 +174,7 @@ void	Server::_receiveData(Client *client)
 		{
 			buffer[ret] = '\0';
 			str buff = buffer;
+
 
 			std::cout << YEL <<"recv(" << client->getFD() << "): " << WHT << buff;
 			if (buff.at(buff.size() - 1) == '\n') {
@@ -251,7 +254,7 @@ int	Server::addClient(int socket, str ip, int port)
 
 int	Server::delClient(int socket)
 {
-	for (unsigned long client = 0; client < this->_clients.size(); client++)
+	for (size_t client = 0; client < this->_clients.size(); client++)
 	{
 		if (this->_clients[client]->getFD() == socket)
 		{
@@ -267,6 +270,7 @@ int	Server::delClient(int socket)
 				if (this->_channels[chan]->isInChannel(this->_clients[client]))
 					this->_channels[chan]->removeClient(this->_clients[client], "");
 			}
+			delete this->_clients[client];
 			this->_clients.erase(this->_clients.begin() + client);
 			break;
 		}
