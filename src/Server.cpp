@@ -81,37 +81,6 @@ void	Server::listen(void)
 #include <cerrno>
 #include <cstring>
 
-
-/*
-void	Server::_waitActivity(void)
-{
-	// wait for an activity in a socket
-	if (poll(this->_clients_fds, this->_clients.size() + 1, -1) < 0 && !Server::_signal_recv)
-	{
-		std::cout << std::strerror(errno) <<"\nError: Can't look for socket(s) activity." << std::endl;
-		std::fflush(stdout);
-		throw std::runtime_error("poll() failed");
-	}
-
-	// loop in every client socket for a connection
-	for(unsigned long i=0; i < this->_clients.size() + 1; i++)
-	{
-		// revents will be != 0 if there is an activity on the socket
-		if(this->_clients_fds[i].revents == 0)
-			continue;
-
-		// if server socket is active, accept the connection
-		if (this->_clients_fds[i].fd == this->_server_socket)
-			this->_acceptConnection();
-		else if (i > 0)
-		{		
-			Client *client = this->_clients[i - 1];
-			this->_receiveData(client);
-		}
-	}
-}
-*/
-
 void Server::_waitActivity(void)
 {
     // wait for an activity in a socket

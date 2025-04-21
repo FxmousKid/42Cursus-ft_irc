@@ -76,7 +76,13 @@ void	Client::welcome()
 	reply(RPL_WELCOME(this->getNickName(), this->getPrefix()));
 	reply(RPL_YOURHOST(this->getNickName(), this->_server->getServerName(), "0.1"));
 	reply(RPL_CREATED(this->getNickName(), this->_server->getStartTime()));
-	reply(RPL_MYINFO(this->getNickName(), this->_server->getServerName(), "0.1", "aiorsw", "IObeiklmnopstv"));
+	reply(RPL_MYINFO(
+			this->getNickName(),
+			this->_server->getServerName(),
+			SERVER_VERSION,
+			SUPPORTED_USER_MODES,
+			SUPPORTED_OP_MODES
+		));
 
 	// TODO: faire des fonction RPL
 	reply("375 " + this->getNickName() + " :- " + this->_server->getServerName() + " Message of the day -");

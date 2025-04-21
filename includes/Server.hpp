@@ -24,6 +24,9 @@ typedef std::vector<str> vec_str;
 
 # define DEFAULT_PORT 6667
 # define DEFAULT_SERVER_NAME "irc.42.fr"
+# define SERVER_VERSION "1.0"
+# define SUPPORTED_USER_MODES "aiorsw"
+# define SUPPORTED_OP_MODES "IOklnpt"
 # define MAX_CONN 1024
 
 class Client;
