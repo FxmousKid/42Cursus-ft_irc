@@ -1,4 +1,5 @@
 #include "ft_irc.hpp"
+#include <cstdio>
 
 KickCommand::KickCommand(Server *server) : Command(server) {}
 
@@ -47,9 +48,17 @@ void KickCommand::execute(Client *client, std::vector<std::string> arguments)
 
 	// Check if target is in channel
 	Client *user = this->_server->getClient(target);
+	if (!user)
+	{
+		client->reply(ERR_NOSUCHNICK(client->getNickName(), target));
+		return;
+	}
 	if (!chan || !chan->isInChannel(user))
 	{
-		client->reply(ERR_USERNOTINCHANNEL(client->getNickName(), user->getNickName(), chan_name));
+		printf("chan name = %s\n", chan_name.c_str());
+		client->reply(ERR_USERNOTINCHANNEL(client->getNickName(), 
+									 user->getNickName(), 
+		chan_name));
 		return;
 	}
 	chan->kick(client, user, reason);
