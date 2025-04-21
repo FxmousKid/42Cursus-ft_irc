@@ -212,6 +212,8 @@ void Server::_processClientData(Client *client)
                     str cmd = *it;
                     
                     // Process the command
+					if (cmd.empty())
+						continue;
                     this->_handler.invoke(client, cmd);
                     
                     // Check if client still exists
