@@ -28,6 +28,7 @@ SRC_FILES_NAMES += commands/NOTICE.cpp
 SRC_FILES_NAMES += commands/INVITE.cpp
 SRC_FILES_NAMES += commands/JOIN.cpp
 SRC_FILES_NAMES += commands/KICK.cpp
+SRC_FILES_NAMES += commands/TOPIC.cpp
 
 # Full path to source files
 SRC_FILES = $(addprefix $(SRC_DIR), $(SRC_FILES_NAMES))
@@ -53,10 +54,12 @@ MKDIR = mkdir -p
 RM_RF = rm -rf
 ECHO = echo -e
 
-BLUE		= \033[34m
-YELLOW		= \033[33m
-GREEN		= \033[32m
-END			= \033[0m
+
+BLUE	:= $(shell echo -e "\033[34m") 
+BROWN	:= $(shell echo -e "\033[33m")
+GREEN	:= $(shell echo -e "\033[32m")
+RED		:= $(shell echo -e "\033[31m")
+NC		:= $(shell echo -e "\033[0m")
 
 #<><><><><><><> Recipes <><><><><><><><><><><><><><><><><><>
 
